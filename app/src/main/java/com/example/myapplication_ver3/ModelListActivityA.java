@@ -7,42 +7,44 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.Toast;
 
 import com.example.myapplication_ver3.database.ModelTable;
 
 import java.util.List;
 
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class ModelListActivity extends AppCompatActivity {
+public class ModelListActivityA extends AppCompatActivity {
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_machinelist);
-        ScrollView scrollView = findViewById(R.id.baselayout);
-        LinearLayout linearLayout = new LinearLayout(this);
+        final ScrollView scrollView = findViewById(R.id.baselayout);
+        final LinearLayout linearLayout = new LinearLayout(this);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         scrollView.addView(linearLayout);
 
-        Handler handler = new Handler();
-        GetModelListToDatabaseThread getModelListToDatabaseThread = new GetModelListToDatabaseThread(this);
-        getModelListToDatabaseThread.setCallbak(new GetModelListToDatabaseThread.Callback() {
+
+        final Handler handler = new Handler();
+        AccessModelListThread accessModelListThread = new AccessModelListThread(this);
+        accessModelListThread.setCallbak(new AccessModelListThread.Callback() {
             @Override
             public void callback(final List<ModelTable> list) {
-                handler.post(()-> {
-                        Button updateButton = new Button(ModelListActivity.this);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Button updateButton = new Button(ModelListActivityA.this);
                         updateButton.setText("更新");
                         updateButton.setOnClickListener((v)->{
-                            GetModelListToWebThread getModelListToWebThread = new GetModelListToWebThread(ModelListActivity.this,handler);
-                            getModelListToWebThread.start();
+
                         });
                         linearLayout.addView(updateButton);
                         for (ModelTable modelTable : list) {
-                            Button button = new Button(ModelListActivity.this);
+                            Button button = new Button(ModelListActivityA.this);
                             button.setText(modelTable.modelName);
                             button.setTag(modelTable.modelNo);
                             linearLayout.addView(button);
@@ -57,9 +59,10 @@ public class ModelListActivity extends AppCompatActivity {
                                 }
                             });
                         }
+                    }
                 });
             }
         });
-        getModelListToDatabaseThread.start();
+        accessModelListThread.start();
     }
 }
